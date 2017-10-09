@@ -30,5 +30,5 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.1'
     testCompile 'junit:junit:4.12'
-    compile 'com.dji:dji-uilibrary:4.3.0'
+    compile 'com.dji:dji-uilibrary:4.3.2'
 }
