@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Environment;
@@ -88,8 +89,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         lastClickView = null;
         if (mMediaManager != null) {
             mMediaManager.stop(null);
+            mMediaManager.removeFileListStateCallback(this.updateFileListStateListener);
             mMediaManager.removeMediaUpdatedVideoPlaybackStateListener(updatedVideoPlaybackStateListener);
             mMediaManager.exitMediaDownloading();
+            if (scheduler!=null) {
+                scheduler.removeAllTasks();
+            }
         }
 
         DemoApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, new CommonCallbacks.CompletionCallback() {
@@ -170,23 +175,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void showProgressDialog() {
-        if (mLoadingDialog != null) {
             runOnUiThread(new Runnable() {
                 public void run() {
-                    mLoadingDialog.show();
+                    if (mLoadingDialog != null) {
+                        mLoadingDialog.show();
+                    }
                 }
             });
-        }
     }
 
     private void hideProgressDialog() {
-        if (null != mLoadingDialog && mLoadingDialog.isShowing()) {
-            runOnUiThread(new Runnable() {
-                public void run() {
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                if (null != mLoadingDialog && mLoadingDialog.isShowing()) {
                     mLoadingDialog.dismiss();
                 }
-            });
-        }
+            }
+        });
     }
 
     private void ShowDownloadProgressDialog() {
@@ -717,4 +723,5 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
         }
     }
+
 }
