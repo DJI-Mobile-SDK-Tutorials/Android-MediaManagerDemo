@@ -31,7 +31,7 @@
 
     <!-- Permissions and features -->
     <application
-        android:name=".DemoApplication"
+        android:name=".MApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -47,9 +47,17 @@
             android:name="com.dji.sdk.API_KEY"
             android:value="Please enter your App Key here." />
 
+        <!-- DJI SDK -->
         <activity
-            android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
-            android:theme="@android:style/Theme.Translucent">
+            android:name=".ConnectionActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
             </intent-filter>
@@ -58,19 +66,8 @@
                 android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
                 android:resource="@xml/accessory_filter" />
         </activity>
-
-        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" />
-        <!-- DJI SDK -->
-        <activity
-            android:name=".ConnectionActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity android:name=".DefaultLayoutActivity"
+            android:configChanges="orientation"
             android:screenOrientation="landscape"></activity>
         <activity
             android:name=".MainActivity"
