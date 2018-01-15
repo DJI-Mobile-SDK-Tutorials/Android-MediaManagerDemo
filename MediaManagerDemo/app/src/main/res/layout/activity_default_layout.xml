@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -51,17 +52,18 @@
             android:layout_height="22dp"/>
 
         <dji.ui.widget.WiFiSignalWidget
-            android:layout_width="22dp"
-            android:layout_height="20dp"/>
+            android:layout_width="32dp"
+            android:layout_height="25dp"/>
 
         <dji.ui.widget.BatteryWidget
-            android:layout_width="56dp"
-            android:layout_height="22dp"/>
+            android:layout_width="96dp"
+            android:layout_height="22dp"
+            custom:excludeView="singleVoltage"/>
 
         <dji.ui.widget.ConnectionWidget
-            android:layout_marginTop="5dp"
-            android:layout_width="22dp"
-            android:layout_height="22dp"/>
+            android:layout_marginTop="3dp"
+            android:layout_width="18dp"
+            android:layout_height="18dp"/>
     </LinearLayout>
 
     <LinearLayout
@@ -183,6 +185,15 @@
         android:gravity="center"
         android:visibility="invisible" />
 
+    <Button
+        android:id="@+id/btn_mediaManager"
+        android:layout_width="38dp"
+        android:layout_height="30dp"
+        android:layout_alignStart="@+id/CameraCapturePanel"
+        android:layout_below="@id/CameraCapturePanel"
+        android:background="@drawable/playback"
+        android:visibility="visible" />
+
     <!-- Pre-flight checklist panel -->
     <dji.ui.panel.PreFlightCheckListPanel
         android:id="@+id/PreflightCheckView"
@@ -191,24 +202,5 @@
         android:layout_below="@id/signal"
         android:visibility="gone"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp"
-        android:layout_alignParentBottom="true">
-
-        <Button
-            android:id="@+id/btn_mediaManager"
-            android:layout_width="38dp"
-            android:layout_height="30dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignStart="@+id/CameraCapturePanel"
-            android:layout_below="@id/CameraCapturePanel"
-            android:layout_marginLeft="530dp"
-            android:background="@drawable/playback"
-            android:visibility="visible" />
-
-    </LinearLayout>
 
 </RelativeLayout>
