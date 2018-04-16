@@ -284,10 +284,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
             if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)){
                 DJILog.e(TAG, "Media Manager is busy.");
             }else{
-                mMediaManager.refreshFileList(new CommonCallbacks.CompletionCallback() {
+
+                mMediaManager.refreshFileListOfStorageLocation(SettingsDefinitions.StorageLocation.SDCARD, new CommonCallbacks.CompletionCallback() {
                     @Override
-                    public void onResult(DJIError error) {
-                        if (null == error) {
+                    public void onResult(DJIError djiError) {
+                        if (null == djiError) {
                             hideProgressDialog();
 
                             //Reset data
@@ -297,7 +298,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 lastClickView = null;
                             }
 
-                            mediaFileList = mMediaManager.getFileListSnapshot();
+                            mediaFileList = mMediaManager.getSDCardFileListSnapshot();
                             Collections.sort(mediaFileList, new Comparator<MediaFile>() {
                                 @Override
                                 public int compare(MediaFile lhs, MediaFile rhs) {
@@ -320,10 +321,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             });
                         } else {
                             hideProgressDialog();
-                            setResultToToast("Get Media File List Failed:" + error.getDescription());
+                            setResultToToast("Get Media File List Failed:" + djiError.getDescription());
                         }
                     }
                 });
+
             }
         }
     }

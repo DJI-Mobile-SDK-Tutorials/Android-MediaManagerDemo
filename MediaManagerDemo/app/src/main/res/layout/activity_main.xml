@@ -97,7 +97,7 @@
         android:textSize="11sp" />
 
     <!-- Widget to see first person view (FPV) -->
-    <dji.ui.widget.FPVWidget
+    <dji.ux.widget.FPVWidget
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/play_btn"
