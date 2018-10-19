@@ -32,12 +32,12 @@ import dji.common.error.DJICameraError;
 import dji.common.error.DJIError;
 import dji.common.util.CommonCallbacks;
 import dji.log.DJILog;
-import dji.sdk.camera.DownloadListener;
-import dji.sdk.camera.FetchMediaTask;
-import dji.sdk.camera.FetchMediaTaskContent;
-import dji.sdk.camera.FetchMediaTaskScheduler;
-import dji.sdk.camera.MediaFile;
-import dji.sdk.camera.MediaManager;
+import dji.sdk.media.DownloadListener;
+import dji.sdk.media.FetchMediaTask;
+import dji.sdk.media.FetchMediaTaskContent;
+import dji.sdk.media.FetchMediaTaskScheduler;
+import dji.sdk.media.MediaFile;
+import dji.sdk.media.MediaManager;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
@@ -605,7 +605,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 @Override
                 public void onResult(DJIError error) {
                     if (null != error) {
-                        setResultToToast("Play Video Failed" + error.getDescription());
+                        setResultToToast("Play Video Failed " + error.getDescription());
                     } else {
                         DJILog.e(TAG, "Play Video Success");
                     }

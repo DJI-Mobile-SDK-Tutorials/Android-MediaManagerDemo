@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="com.dji:dji-sdk-provided:4.7.1@jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.dji/dji-sdk-provided/4.7.1/1a8f157a580e05c7ffaa34426ba878b02b689f55/dji-sdk-provided-4.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.dji/dji-sdk-provided/4.7.1/a36e44df93d938675adeaa55c7b609807951abac/dji-sdk-provided-4.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
