@@ -30,14 +30,17 @@ import java.util.List;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJICameraError;
 import dji.common.error.DJIError;
+import dji.common.product.Model;
 import dji.common.util.CommonCallbacks;
 import dji.log.DJILog;
+import dji.sdk.base.BaseProduct;
 import dji.sdk.media.DownloadListener;
 import dji.sdk.media.FetchMediaTask;
 import dji.sdk.media.FetchMediaTaskContent;
 import dji.sdk.media.FetchMediaTaskScheduler;
 import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
+import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
@@ -315,7 +318,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 public void onResult(DJIError error) {
                                     if (error == null) {
                                         getThumbnails();
-                                        getPreviews();
                                     }
                                 }
                             });
@@ -337,16 +339,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         for (int i = 0; i < mediaFileList.size(); i++) {
             getThumbnailByIndex(i);
-        }
-    }
-
-    private void getPreviews() {
-        if (mediaFileList.size() <= 0) {
-            setResultToToast("No File info for downloading previews");
-            return;
-        }
-        for (int i = 0; i < mediaFileList.size(); i++) {
-            getPreviewByIndex(i);
         }
     }
 
@@ -376,11 +368,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private void getThumbnailByIndex(final int index) {
         FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.THUMBNAIL, taskCallback);
-        scheduler.moveTaskToEnd(task);
-    }
-
-    private void getPreviewByIndex(final int index) {
-        FetchMediaTask task = new FetchMediaTask(mediaFileList.get(index), FetchMediaTaskContent.PREVIEW, taskCallback);
         scheduler.moveTaskToEnd(task);
     }
 
@@ -462,17 +449,49 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private View.OnClickListener ImgOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
-            MediaFile selectedMedia = (MediaFile )v.getTag();
-            final Bitmap previewImage = selectedMedia.getPreview();
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    mDisplayImageView.setVisibility(View.VISIBLE);
-                    mDisplayImageView.setImageBitmap(previewImage);
-                }
-            });
+            MediaFile selectedMedia = (MediaFile) v.getTag();
+            if (selectedMedia != null && mMediaManager != null) {
+                addMediaTask(selectedMedia);
+            }
         }
     };
+
+    private void addMediaTask(final MediaFile mediaFile) {
+        final FetchMediaTaskScheduler scheduler = mMediaManager.getScheduler();
+        final FetchMediaTask task =
+                new FetchMediaTask(mediaFile, FetchMediaTaskContent.PREVIEW, new FetchMediaTask.Callback() {
+                    @Override
+                    public void onUpdate(final MediaFile mediaFile, FetchMediaTaskContent fetchMediaTaskContent, DJIError error) {
+                        if (null == error) {
+                            if (mediaFile.getPreview() != null) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        final Bitmap previewBitmap = mediaFile.getPreview();
+                                        mDisplayImageView.setVisibility(View.VISIBLE);
+                                        mDisplayImageView.setImageBitmap(previewBitmap);
+                                    }
+                                });
+                            } else {
+                                setResultToToast("null bitmap!");
+                            }
+                        } else {
+                            setResultToToast("fetch preview image failed: " + error.getDescription());
+                        }
+                    }
+                });
+
+        scheduler.resume(new CommonCallbacks.CompletionCallback() {
+            @Override
+            public void onResult(DJIError error) {
+                if (error == null) {
+                    scheduler.moveTaskToNext(task);
+                } else {
+                    setResultToToast("resume scheduler failed: " + error.getDescription());
+                }
+            }
+        });
+    }
 
     //Listeners
     private MediaManager.FileListStateListener updateFileListStateListener = new MediaManager.FileListStateListener() {
