@@ -43,7 +43,7 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.1'
 
-    compile 'com.dji:dji-uxsdk:4.9'
-    provided ('com.dji:dji-sdk-provided:4.9')
+    compile 'com.dji:dji-uxsdk:4.10'
+    provided ('com.dji:dji-sdk-provided:4.10')
 
 }
