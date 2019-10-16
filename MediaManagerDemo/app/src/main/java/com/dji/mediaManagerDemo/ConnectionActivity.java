@@ -9,10 +9,11 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -181,6 +182,11 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                         }
                         @Override
                         public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
+
+                        }
+
+                        @Override
+                        public void onDatabaseDownloadProgress(long l, long l1) {
 
                         }
                     });

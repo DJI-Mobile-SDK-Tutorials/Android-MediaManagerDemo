@@ -114,7 +114,7 @@
         android:background="@color/black_overlay"
         android:visibility="invisible" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/filelistView"
         android:layout_width="250dp"
         android:layout_height="match_parent"
