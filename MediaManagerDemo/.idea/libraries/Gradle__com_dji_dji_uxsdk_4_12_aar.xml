@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.dji:dji-uxsdk:4.12@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5464b1ef8f762cd32276415120c2a4c2/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/5464b1ef8f762cd32276415120c2a4c2/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

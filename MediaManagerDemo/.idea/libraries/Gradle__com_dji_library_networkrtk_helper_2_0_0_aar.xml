@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.dji:library-networkrtk-helper:2.0.0@aar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e468b30ad25c168fd05ed3744d129b50/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e468b30ad25c168fd05ed3744d129b50/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-2/files-2.1/e468b30ad25c168fd05ed3744d129b50/jars/libs/wz-rtcm-2.0.1-release.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
