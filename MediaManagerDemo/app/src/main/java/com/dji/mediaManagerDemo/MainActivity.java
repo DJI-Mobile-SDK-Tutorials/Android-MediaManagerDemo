@@ -154,7 +154,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBackBtn = (Button) findViewById(R.id.back_btn);
         mDeleteBtn = (Button) findViewById(R.id.delete_btn);
         mDownloadBtn = (Button) findViewById(R.id.download_btn);
-        mDownloadBtn = (Button) findViewById(R.id.download_all_btn);
+        mDownloadAllBtn = (Button) findViewById(R.id.download_all_btn);
         mReloadBtn = (Button) findViewById(R.id.reload_btn);
         mStatusBtn = (Button) findViewById(R.id.status_btn);
         mPlayBtn = (Button) findViewById(R.id.play_btn);
@@ -170,9 +170,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mDownloadBtn.setOnClickListener(this);
         mDownloadAllBtn.setOnClickListener(this);
         //mReloadBtn.setOnClickListener(this);
-        mDownloadBtn.setOnClickListener(this);
         //mStatusBtn.setOnClickListener(this);
-        mPlayBtn.setOnClickListener(this);
+        //mPlayBtn.setOnClickListener(this);
         //mResumeBtn.setOnClickListener(this);
         //mPauseBtn.setOnClickListener(this);
         //mStopBtn.setOnClickListener(this);
