@@ -50,6 +50,7 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
     private TextView mVersionTv;
 
     private Button mBtnOpen;
+    private Button mBtnMediaBrowser;
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
         Manifest.permission.VIBRATE,
         Manifest.permission.INTERNET,
@@ -240,6 +241,10 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         mBtnOpen.setOnClickListener(this);
         mBtnOpen.setEnabled(false);
 
+        mBtnMediaBrowser = (Button) findViewById(R.id.btn_browse_media);
+        mBtnMediaBrowser.setOnClickListener(this);
+        mBtnMediaBrowser.setEnabled(true);
+
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -300,6 +305,12 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
 
             case R.id.btn_open: {
                 Intent intent = new Intent(this, DefaultLayoutActivity.class);
+                startActivity(intent);
+                break;
+            }
+            case R.id.btn_browse_media: {
+                Intent intent = new Intent(this, MainActivity.class);
+                showToast("You are browsing media files on the drone.");
                 startActivity(intent);
                 break;
             }
