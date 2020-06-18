@@ -46,7 +46,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
-    private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mStatusBtn;
+    private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mDownloadAllBtn, mStatusBtn;
     private Button mPlayBtn, mResumeBtn, mPauseBtn, mStopBtn, mMoveToBtn;
     private RecyclerView listView;
     private FileListAdapter mListAdapter;
@@ -57,7 +57,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ProgressDialog mLoadingDialog;
     private ProgressDialog mDownloadDialog;
     private SlidingDrawer mPushDrawerSd;
-    File destDir = new File(Environment.getExternalStorageDirectory().getPath() + "/MediaManagerDemo/");
+    File destDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getPath() + "/DJIMediaManager/");
+    //File destDir = new File(this.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS).getPath() + "/DJIMediaManager/");
     private int currentProgress = -1;
     private ImageView mDisplayImageView;
     private int lastClickViewIndex =-1;
@@ -67,7 +68,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_media_browser);
         initUI();
     }
 
@@ -153,6 +154,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBackBtn = (Button) findViewById(R.id.back_btn);
         mDeleteBtn = (Button) findViewById(R.id.delete_btn);
         mDownloadBtn = (Button) findViewById(R.id.download_btn);
+        mDownloadBtn = (Button) findViewById(R.id.download_all_btn);
         mReloadBtn = (Button) findViewById(R.id.reload_btn);
         mStatusBtn = (Button) findViewById(R.id.status_btn);
         mPlayBtn = (Button) findViewById(R.id.play_btn);
@@ -166,14 +168,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mBackBtn.setOnClickListener(this);
         mDeleteBtn.setOnClickListener(this);
         mDownloadBtn.setOnClickListener(this);
-        mReloadBtn.setOnClickListener(this);
+        mDownloadAllBtn.setOnClickListener(this);
+        //mReloadBtn.setOnClickListener(this);
         mDownloadBtn.setOnClickListener(this);
-        mStatusBtn.setOnClickListener(this);
+        //mStatusBtn.setOnClickListener(this);
         mPlayBtn.setOnClickListener(this);
-        mResumeBtn.setOnClickListener(this);
-        mPauseBtn.setOnClickListener(this);
-        mStopBtn.setOnClickListener(this);
-        mMoveToBtn.setOnClickListener(this);
+        //mResumeBtn.setOnClickListener(this);
+        //mPauseBtn.setOnClickListener(this);
+        //mStopBtn.setOnClickListener(this);
+        //mMoveToBtn.setOnClickListener(this);
 
     }
 
@@ -437,6 +440,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             lastClickViewIndex = (int) (v.getTag());
+            setResultToToast(String.valueOf(lastClickViewIndex));
 
             if (lastClickView != null && lastClickView != v) {
                 lastClickView.setSelected(false);
@@ -586,6 +590,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         });
     }
 
+    private void downloadAllFiles() {
+        for (int i = 0; i < mediaFileList.size(); i++) {
+            downloadFileByIndex(i);
+        }
+    }
+
     private void deleteFileByIndex(final int index) {
         ArrayList<MediaFile> fileToDelete = new ArrayList<MediaFile>();
         if (mediaFileList.size() > index) {
@@ -617,6 +627,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void playVideo() {
+        if(lastClickViewIndex == -1) {
+            setResultToToast("No media file is selected.");
+            return;
+        }
         mDisplayImageView.setVisibility(View.INVISIBLE);
         MediaFile selectedMediaFile = mediaFileList.get(lastClickViewIndex);
         if ((selectedMediaFile.getMediaType() == MediaFile.MediaType.MOV) || (selectedMediaFile.getMediaType() == MediaFile.MediaType.MP4)) {
@@ -674,7 +688,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.delete_btn:{
-                deleteFileByIndex(lastClickViewIndex);
+                if(lastClickViewIndex != -1) deleteFileByIndex(lastClickViewIndex);
                 break;
             }
             case R.id.reload_btn: {
@@ -682,7 +696,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.download_btn: {
-                downloadFileByIndex(lastClickViewIndex);
+                String path = destDir.getPath();
+                setResultToToast("Storage path: " + path);
+                new File(path.substring(0, path.lastIndexOf("/"))).mkdirs();
+
+                setResultToToast("Selected media file index: " + String.valueOf(lastClickViewIndex));
+                if(lastClickViewIndex != -1) downloadFileByIndex(lastClickViewIndex);
+                break;
+            }
+            case R.id.download_all_btn: {
+                String path = destDir.getPath();
+                setResultToToast("Storage path: " + path);
+                new File(path.substring(0, path.lastIndexOf("/"))).mkdirs();
+
+                downloadAllFiles();
                 break;
             }
             case R.id.status_btn: {
