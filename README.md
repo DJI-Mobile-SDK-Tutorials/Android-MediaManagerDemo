@@ -20,6 +20,7 @@ This demo is designed for you to learn how to use `MediaManager` to interact wit
  - Phantom 4 Pro
  - Phantom 4 Advanced
  - Inspire 2
+ - Matrice 210 RTK V2
 
 ## Tutorial
 
