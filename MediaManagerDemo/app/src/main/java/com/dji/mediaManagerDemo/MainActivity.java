@@ -42,16 +42,11 @@ import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
 import dji.sdk.sdkmanager.DJISDKManager;
 
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Retrofit;
+import retrofit2.*;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Body;
-import retrofit2.http.GET;
-import retrofit2.http.Headers;
-import retrofit2.http.POST;
+import retrofit2.http.*;
+
+import com.google.gson.*;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
@@ -59,6 +54,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private Button mBackBtn, mDeleteBtn, mReloadBtn, mDownloadBtn, mDownloadAllBtn, mStatusBtn;
     private Button mPlayBtn, mResumeBtn, mPauseBtn, mStopBtn, mMoveToBtn;
+    private Button mNewMissionBtn, mUploadToCloudBtn;
     private RecyclerView listView;
     private FileListAdapter mListAdapter;
     private List<MediaFile> mediaFileList = new ArrayList<MediaFile>();
@@ -175,6 +171,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mMoveToBtn = (Button) findViewById(R.id.moveTo_btn);
         mDisplayImageView = (ImageView) findViewById(R.id.imageView);
         mDisplayImageView.setVisibility(View.VISIBLE);
+        mNewMissionBtn = (Button) findViewById(R.id.new_mission_btn);
+        mUploadToCloudBtn = (Button) findViewById(R.id.upload_to_mc_btn);
 
         mBackBtn.setOnClickListener(this);
         mDeleteBtn.setOnClickListener(this);
@@ -187,7 +185,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         //mPauseBtn.setOnClickListener(this);
         //mStopBtn.setOnClickListener(this);
         //mMoveToBtn.setOnClickListener(this);
-
+        mNewMissionBtn.setOnClickListener(this);
+        mUploadToCloudBtn.setOnClickListener(this);
     }
 
     private void showProgressDialog() {
@@ -697,6 +696,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 this.finish();
                 break;
             }
+
+            // photo operators
             case R.id.delete_btn:{
                 if(lastClickViewIndex != -1) deleteFileByIndex(lastClickViewIndex);
                 break;
@@ -730,6 +731,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 }
                 break;
             }
+
+            // MC connector
+            case R.id.new_mission_btn: {
+                String missionName = "DJI Media Manager Demo";
+                newMission(missionName);
+                break;
+            }
+            case R.id.upload_to_mc_btn: {
+                String missionId = "";
+                uploadToMissionControl(missionId, lastClickViewIndex);
+                break;
+            }
+
+            // video playback
             case R.id.play_btn: {
                 playVideo();
                 break;
@@ -780,6 +795,111 @@ public class MainActivity extends Activity implements View.OnClickListener {
             default:
                 break;
         }
+    }
+
+    /****************************************************************************************
+     * Mission Control API Call
+     ****************************************************************************************/
+    public class Mission {
+        public String item_number;
+        public String name;
+        public String description;
+        public String start_time;
+        public String end_time;
+        public String home_longitude;
+        public String home_latitude;
+        public String home_altitude;
+        public String progress;
+        public String status;
+
+
+        public ArrayList<Aircraft> aircraft;
+        public ArrayList<Team> team;
+
+    }
+
+    public class Aircraft {
+        public String id;
+        public String name;
+    }
+
+    public class Team {
+        public String id;
+        public String name;
+        public String flight_role;
+    }
+
+    public class NewMissionResponse {
+        public String message;
+        public String item_id;
+        public Mission data;
+    }
+
+    public interface MissionControlApiService {
+        @Headers({"Content-Type: application/json", "auth_code: 81064329eed541e491d49655c000d052_1402249f06d7a33c56aa17d5e76886d4_0207bddaf3e2b2650ad8bf5f1f52c317"})
+        @POST("https://api.ammc.automodality.com/api/mission/new")
+        Call<NewMissionResponse> mcNewMission(@Body Mission mission);
+    }
+
+    private void newMission(final String missionName) {
+        String baseURL = "https://api.ammc.automodality.com/api/mission/new/";
+
+        Gson gson = new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(baseURL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        Mission mission = new Mission();
+        mission.item_number = "MIS-101234.000";
+        mission.name = missionName;
+        mission.description = "Android API test";
+        mission.start_time = "04/28/2020 3:00 PM";
+        mission.end_time = "04/28/2020 5:00 PM";
+        mission.home_longitude = "-76.221850";
+        mission.home_latitude = "43.137545";
+        mission.home_altitude = "0";
+        mission.progress = "0";
+        mission.status = "0";
+
+        Team pic = new Team();
+        pic.id = "2a8d59da-6ca1-401c-899a-290619c0e834";
+        pic.name = "USR-00001002 Yunpeng Li";
+        pic.flight_role = "PIC";
+
+        Aircraft uav = new Aircraft();
+        uav.id = "8453c97d-917b-44bc-a5b3-c26d0211ce96";
+        uav.name = "UAV-1049 Tori";
+
+        mission.aircraft = new ArrayList<Aircraft>();
+        mission.aircraft.add(uav);
+        mission.team = new ArrayList<Team>();
+        mission.team.add(pic);
+
+        DJILog.i("NewMissionApiRequest", mission.toString());
+
+        MissionControlApiService apiService = retrofit.create(MissionControlApiService.class);
+        Call<NewMissionResponse> response = apiService.mcNewMission(mission);
+        response.enqueue(new Callback<NewMissionResponse>() {
+            @Override
+            public void onResponse(Call<NewMissionResponse> call, retrofit2.Response<NewMissionResponse> response) {
+                System.out.println(response);
+                DJILog.i("NewMissionApiResponse", response.toString());
+            }
+
+            @Override
+            public void onFailure(Call<NewMissionResponse> response, Throwable t){
+                System.out.println((response));
+                System.out.println(t);
+            }
+        });
+    }
+
+    private void uploadToMissionControl(final String missionId, final int index){
+        // TODO
     }
 
 }
