@@ -854,22 +854,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 .build();
 
         Mission mission = new Mission();
-        mission.item_number = "MIS-101234.000";
+        mission.item_number = "MIS-101234.999";
         mission.name = missionName;
-        mission.description = "Android API test";
-        mission.start_time = "04/28/2020 3:00 PM";
-        mission.end_time = "04/28/2020 5:00 PM";
+        mission.description = "Android Mobile App API call test";
+        mission.start_time = "06/30/2020 3:00 PM";
+        mission.end_time = "06/30/2020 5:00 PM";
         mission.home_longitude = "-76.221850";
         mission.home_latitude = "43.137545";
         mission.home_altitude = "0";
         mission.progress = "0";
         mission.status = "0";
 
+        // AM YP
         Team pic = new Team();
         pic.id = "2a8d59da-6ca1-401c-899a-290619c0e834";
         pic.name = "USR-00001002 Yunpeng Li";
         pic.flight_role = "PIC";
 
+        // AM Tori
         Aircraft uav = new Aircraft();
         uav.id = "8453c97d-917b-44bc-a5b3-c26d0211ce96";
         uav.name = "UAV-1049 Tori";
@@ -885,15 +887,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
         Call<NewMissionResponse> response = apiService.mcNewMission(mission);
         response.enqueue(new Callback<NewMissionResponse>() {
             @Override
-            public void onResponse(Call<NewMissionResponse> call, retrofit2.Response<NewMissionResponse> response) {
-                System.out.println(response);
-                DJILog.i("NewMissionApiResponse", response.toString());
+            public void onResponse(Call<NewMissionResponse> call, Response<NewMissionResponse> response) {
+                //String msg = new Gson().toJson(response.body());
+                String message = response.body().message;
+                System.out.println("MC Web API response: " + message);
+                if(response.code() == 200) {
+                    String missionId = response.body().item_id;
+                    setResultToToast("New mission created: " + missionId);
+                }
             }
 
             @Override
-            public void onFailure(Call<NewMissionResponse> response, Throwable t){
-                System.out.println((response));
-                System.out.println(t);
+            public void onFailure(Call<NewMissionResponse> call, Throwable t){
+                String error = t.toString();
+                System.out.println(error);
             }
         });
     }
