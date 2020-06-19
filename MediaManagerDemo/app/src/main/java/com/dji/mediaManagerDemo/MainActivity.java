@@ -42,6 +42,17 @@ import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
 import dji.sdk.sdkmanager.DJISDKManager;
 
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
+import retrofit2.http.GET;
+import retrofit2.http.Headers;
+import retrofit2.http.POST;
+
 public class MainActivity extends Activity implements View.OnClickListener {
 
     private static final String TAG = MainActivity.class.getName();
