@@ -8,8 +8,8 @@ This demo is designed for you to learn how to use `MediaManager` to interact wit
 
  - Android Studio 2.0+
  - Android System 4.1+
- - DJI Android SDK 4.12
- - DJI Android UXSDK 4.12
+ - DJI Android SDK 4.13
+ - DJI Android UXSDK 4.13
 
 ## Supported DJI Products
 
