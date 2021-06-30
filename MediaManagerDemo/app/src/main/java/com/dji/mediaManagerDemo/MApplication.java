@@ -23,5 +23,4 @@ public class MApplication extends Application {
         super.onCreate();
         demoApplication.onCreate();
     }
-
 }

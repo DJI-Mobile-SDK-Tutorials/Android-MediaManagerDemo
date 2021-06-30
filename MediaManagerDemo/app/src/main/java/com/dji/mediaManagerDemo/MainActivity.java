@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import dji.common.airlink.PhysicalSource;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJICameraError;
 import dji.common.error.DJIError;
@@ -100,14 +101,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         }
 
-        DemoApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError mError) {
-                  if (mError != null){
-                      setResultToToast("Set Shoot Photo Mode Failed" + mError.getDescription());
-                  }
-                }
-        });
+        if (isMavicAir2() || isM300()) {
+            if (DemoApplication.getCameraInstance() != null) {
+                DemoApplication.getCameraInstance().exitPlayback(djiError -> {
+                    if (djiError != null) {
+                        DemoApplication.getCameraInstance().setFlatMode(SettingsDefinitions.FlatCameraMode.PHOTO_SINGLE, djiError1 -> {
+                            if (djiError1 != null){
+                                setResultToToast("Set PHOTO_SINGLE Mode Failed. " + djiError1.getDescription());
+                            }
+                        });
+                    }
+                });
+            } else {
+                DemoApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, djiError -> {
+                    if (djiError != null){
+                        setResultToToast("Set SHOOT_PHOTO Mode Failed. " + djiError.getDescription());
+                    }
+                });
+            }
+        }
 
         if (mediaFileList != null) {
             mediaFileList.clear();
@@ -119,7 +131,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         //Init RecyclerView
         listView = (RecyclerView) findViewById(R.id.filelistView);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, OrientationHelper.VERTICAL,false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, RecyclerView.VERTICAL,false);
         listView.setLayoutManager(layoutManager);
 
         //Init FileListAdapter
@@ -178,17 +190,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void showProgressDialog() {
-            runOnUiThread(new Runnable() {
-                public void run() {
-                    if (mLoadingDialog != null) {
-                        mLoadingDialog.show();
-                    }
+        runOnUiThread(new Runnable() {
+            public void run() {
+                if (mLoadingDialog != null) {
+                    mLoadingDialog.show();
                 }
-            });
+            }
+        });
     }
 
     private void hideProgressDialog() {
-
         runOnUiThread(new Runnable() {
             public void run() {
                 if (null != mLoadingDialog && mLoadingDialog.isShowing()) {
@@ -210,7 +221,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void HideDownloadProgressDialog() {
-
         if (null != mDownloadDialog && mDownloadDialog.isShowing()) {
             runOnUiThread(new Runnable() {
                 public void run() {
@@ -252,9 +262,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 if (null != mMediaManager) {
                     mMediaManager.addUpdateFileListStateListener(this.updateFileListStateListener);
                     mMediaManager.addMediaUpdatedVideoPlaybackStateListener(this.updatedVideoPlaybackStateListener);
-                    DemoApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.MEDIA_DOWNLOAD, new CommonCallbacks.CompletionCallback() {
-                        @Override
-                        public void onResult(DJIError error) {
+                    if (isMavicAir2() || isM300()) {
+                        DemoApplication.getCameraInstance().enterPlayback(djiError -> {
+                            if (djiError == null) {
+                                DJILog.e(TAG, "Set cameraMode success");
+                                showProgressDialog();
+                                getFileList();
+                            } else {
+                                setResultToToast("Set cameraMode failed");
+                            }
+                        });
+                    } else {
+                        DemoApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.MEDIA_DOWNLOAD, error -> {
                             if (error == null) {
                                 DJILog.e(TAG, "Set cameraMode success");
                                 showProgressDialog();
@@ -262,8 +281,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             } else {
                                 setResultToToast("Set cameraMode failed");
                             }
-                        }
-                    });
+                        });
+                    }
+
                     if (mMediaManager.isVideoPlaybackSupported()) {
                         DJILog.e(TAG, "Camera support video playback!");
                     } else {
@@ -288,46 +308,38 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 DJILog.e(TAG, "Media Manager is busy.");
             }else{
 
-                mMediaManager.refreshFileListOfStorageLocation(SettingsDefinitions.StorageLocation.SDCARD, new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError djiError) {
-                        if (null == djiError) {
-                            hideProgressDialog();
+                mMediaManager.refreshFileListOfStorageLocation(SettingsDefinitions.StorageLocation.SDCARD, djiError -> {
+                    if (null == djiError) {
+                        hideProgressDialog();
 
-                            //Reset data
-                            if (currentFileListState != MediaManager.FileListState.INCOMPLETE) {
-                                mediaFileList.clear();
-                                lastClickViewIndex = -1;
-                                lastClickView = null;
-                            }
-
-                            mediaFileList = mMediaManager.getSDCardFileListSnapshot();
-                            Collections.sort(mediaFileList, new Comparator<MediaFile>() {
-                                @Override
-                                public int compare(MediaFile lhs, MediaFile rhs) {
-                                    if (lhs.getTimeCreated() < rhs.getTimeCreated()) {
-                                        return 1;
-                                    } else if (lhs.getTimeCreated() > rhs.getTimeCreated()) {
-                                        return -1;
-                                    }
-                                    return 0;
-                                }
-                            });
-                            scheduler.resume(new CommonCallbacks.CompletionCallback() {
-                                @Override
-                                public void onResult(DJIError error) {
-                                    if (error == null) {
-                                        getThumbnails();
-                                    }
-                                }
-                            });
-                        } else {
-                            hideProgressDialog();
-                            setResultToToast("Get Media File List Failed:" + djiError.getDescription());
+                        //Reset data
+                        if (currentFileListState != MediaManager.FileListState.INCOMPLETE) {
+                            mediaFileList.clear();
+                            lastClickViewIndex = -1;
+                            lastClickView = null;
                         }
+
+                        mediaFileList = mMediaManager.getSDCardFileListSnapshot();
+                        if(mediaFileList != null) {
+                            Collections.sort(mediaFileList, (lhs, rhs) -> {
+                                if (lhs.getTimeCreated() < rhs.getTimeCreated()) {
+                                    return 1;
+                                } else if (lhs.getTimeCreated() > rhs.getTimeCreated()) {
+                                    return -1;
+                                }
+                                return 0;
+                            });
+                        }
+                        scheduler.resume(error -> {
+                            if (error == null) {
+                                getThumbnails();
+                            }
+                        });
+                    } else {
+                        hideProgressDialog();
+                        setResultToToast("Get Media File List Failed:" + djiError.getDescription());
                     }
                 });
-
             }
         }
     }
@@ -371,7 +383,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         scheduler.moveTaskToEnd(task);
     }
 
-    private class ItemHolder extends RecyclerView.ViewHolder {
+    private static class ItemHolder extends RecyclerView.ViewHolder {
         ImageView thumbnail_img;
         TextView file_name;
         TextView file_type;
@@ -481,25 +493,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     }
                 });
 
-        scheduler.resume(new CommonCallbacks.CompletionCallback() {
-            @Override
-            public void onResult(DJIError error) {
-                if (error == null) {
-                    scheduler.moveTaskToNext(task);
-                } else {
-                    setResultToToast("resume scheduler failed: " + error.getDescription());
-                }
+        scheduler.resume(error -> {
+            if (error == null) {
+                scheduler.moveTaskToNext(task);
+            } else {
+                setResultToToast("resume scheduler failed: " + error.getDescription());
             }
         });
     }
 
     //Listeners
-    private MediaManager.FileListStateListener updateFileListStateListener = new MediaManager.FileListStateListener() {
-        @Override
-        public void onFileListStateChange(MediaManager.FileListState state) {
-            currentFileListState = state;
-        }
-    };
+    private MediaManager.FileListStateListener updateFileListStateListener = state -> currentFileListState = state;
 
     private MediaManager.VideoPlaybackStateListener updatedVideoPlaybackStateListener =
             new MediaManager.VideoPlaybackStateListener() {
@@ -572,6 +576,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
 
             @Override
+            public void onRealtimeDataUpdate(byte[] bytes, long l, boolean b) {
+
+            }
+
+            @Override
             public void onStart() {
                 currentProgress = -1;
                 ShowDownloadProgressDialog();
@@ -620,14 +629,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mDisplayImageView.setVisibility(View.INVISIBLE);
         MediaFile selectedMediaFile = mediaFileList.get(lastClickViewIndex);
         if ((selectedMediaFile.getMediaType() == MediaFile.MediaType.MOV) || (selectedMediaFile.getMediaType() == MediaFile.MediaType.MP4)) {
-            mMediaManager.playVideoMediaFile(selectedMediaFile, new CommonCallbacks.CompletionCallback() {
-                @Override
-                public void onResult(DJIError error) {
-                    if (null != error) {
-                        setResultToToast("Play Video Failed " + error.getDescription());
-                    } else {
-                        DJILog.e(TAG, "Play Video Success");
-                    }
+            mMediaManager.playVideoMediaFile(selectedMediaFile, error -> {
+                if (null != error) {
+                    setResultToToast("Play Video Failed " + error.getDescription());
+                } else {
+                    DJILog.e(TAG, "Play Video Success");
                 }
             });
         }
@@ -640,27 +646,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setView(promptsView);
         final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
-        alertDialogBuilder.setCancelable(false).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                String ms = userInput.getText().toString();
-                mMediaManager.moveToPosition(Integer.parseInt(ms),
-                        new CommonCallbacks.CompletionCallback() {
-                            @Override
-                            public void onResult(DJIError error) {
-                                if (null != error) {
-                                    setResultToToast("Move to video position failed" + error.getDescription());
-                                } else {
-                                    DJILog.e(TAG, "Move to video position successfully.");
-                                }
+        alertDialogBuilder.setCancelable(false).setPositiveButton("OK", (dialog, id) -> {
+            String ms = userInput.getText().toString();
+            mMediaManager.moveToPosition(Integer.parseInt(ms),
+                    new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError error) {
+                            if (null != error) {
+                                setResultToToast("Move to video position failed" + error.getDescription());
+                            } else {
+                                DJILog.e(TAG, "Move to video position successfully.");
                             }
-                        });
-            }
+                        }
+                    });
         })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
+                .setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
 
@@ -698,40 +698,31 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 break;
             }
             case R.id.resume_btn: {
-                mMediaManager.resume(new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (null != error) {
-                            setResultToToast("Resume Video Failed" + error.getDescription());
-                        } else {
-                            DJILog.e(TAG, "Resume Video Success");
-                        }
+                mMediaManager.resume(error -> {
+                    if (null != error) {
+                        setResultToToast("Resume Video Failed" + error.getDescription());
+                    } else {
+                        DJILog.e(TAG, "Resume Video Success");
                     }
                 });
                 break;
             }
             case R.id.pause_btn: {
-                mMediaManager.pause(new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (null != error) {
-                            setResultToToast("Pause Video Failed" + error.getDescription());
-                        } else {
-                            DJILog.e(TAG, "Pause Video Success");
-                        }
+                mMediaManager.pause(error -> {
+                    if (null != error) {
+                        setResultToToast("Pause Video Failed" + error.getDescription());
+                    } else {
+                        DJILog.e(TAG, "Pause Video Success");
                     }
                 });
                 break;
             }
             case R.id.stop_btn: {
-                mMediaManager.stop(new CommonCallbacks.CompletionCallback() {
-                    @Override
-                    public void onResult(DJIError error) {
-                        if (null != error) {
-                            setResultToToast("Stop Video Failed" + error.getDescription());
-                        } else {
-                            DJILog.e(TAG, "Stop Video Success");
-                        }
+                mMediaManager.stop(error -> {
+                    if (null != error) {
+                        setResultToToast("Stop Video Failed" + error.getDescription());
+                    } else {
+                        DJILog.e(TAG, "Stop Video Success");
                     }
                 });
                 break;
@@ -745,4 +736,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    private boolean isMavicAir2() {
+        BaseProduct baseProduct = DemoApplication.getProductInstance();
+        if (baseProduct != null) {
+            return baseProduct.getModel() == Model.MAVIC_AIR_2;
+        }
+        return false;
+    }
+
+    private boolean isM300() {
+        BaseProduct baseProduct = DemoApplication.getProductInstance();
+        if (baseProduct != null) {
+            return baseProduct.getModel() == Model.MATRICE_300_RTK;
+        }
+        return false;
+    }
 }

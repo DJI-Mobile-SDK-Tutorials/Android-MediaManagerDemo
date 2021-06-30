@@ -51,19 +51,19 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
 
     private Button mBtnOpen;
     private static final String[] REQUIRED_PERMISSION_LIST = new String[]{
-        Manifest.permission.VIBRATE,
-        Manifest.permission.INTERNET,
-        Manifest.permission.ACCESS_WIFI_STATE,
-        Manifest.permission.WAKE_LOCK,
-        Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.ACCESS_NETWORK_STATE,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.CHANGE_WIFI_STATE,
-        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-        Manifest.permission.BLUETOOTH,
-        Manifest.permission.BLUETOOTH_ADMIN,
-        Manifest.permission.READ_EXTERNAL_STORAGE,
-        Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN,
+            Manifest.permission.VIBRATE,
+            Manifest.permission.INTERNET,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.CHANGE_WIFI_STATE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.READ_PHONE_STATE,
     };
     private List<String> missingPermission = new ArrayList<>();
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
@@ -102,7 +102,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                     missingPermission.toArray(new String[missingPermission.size()]),
                     REQUEST_PERMISSION_CODE);
         }
-
     }
 
     /**
@@ -154,16 +153,22 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                             showToast("Product Disconnected");
 
                         }
+
                         @Override
                         public void onProductConnect(BaseProduct baseProduct) {
                             Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
                             showToast("Product Connected");
 
                         }
+
+                        @Override
+                        public void onProductChanged(BaseProduct baseProduct) {
+
+                        }
+
                         @Override
                         public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
                                                       BaseComponent newComponent) {
-
                             if (newComponent != null) {
                                 newComponent.setComponentListener(new BaseComponent.ComponentListener() {
 
@@ -178,7 +183,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                                             componentKey,
                                             oldComponent,
                                             newComponent));
-
                         }
                         @Override
                         public void onInitProcess(DJISDKInitEvent djisdkInitEvent, int i) {
@@ -228,22 +232,17 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
     }
 
     private void initUI() {
-
         mTextConnectionStatus = (TextView) findViewById(R.id.text_connection_status);
         mTextModelAvailable = (TextView) findViewById(R.id.text_model_available);
         mTextProduct = (TextView) findViewById(R.id.text_product_info);
-
         mVersionTv = (TextView) findViewById(R.id.textView2);
         mVersionTv.setText(getResources().getString(R.string.sdk_version, DJISDKManager.getInstance().getSDKVersion()));
-
         mBtnOpen = (Button) findViewById(R.id.btn_open);
         mBtnOpen.setOnClickListener(this);
         mBtnOpen.setEnabled(false);
-
     }
 
     protected BroadcastReceiver mReceiver = new BroadcastReceiver() {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             refreshSDKRelativeUI();
@@ -269,7 +268,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                 }
             }
         }
-
     }
 
     public void showToast(final String msg) {
@@ -285,7 +283,6 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         if (DemoApplication.getProductInstance() != null) {
             version = DemoApplication.getProductInstance().getFirmwarePackageVersion();
         }
-
         if (TextUtils.isEmpty(version)) {
             mTextModelAvailable.setText("Firmware version:N/A"); //Firmware version:
         } else {
@@ -296,15 +293,9 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-
-            case R.id.btn_open: {
-                Intent intent = new Intent(this, DefaultLayoutActivity.class);
-                startActivity(intent);
-                break;
-            }
-            default:
-                break;
+        if (v.getId() == R.id.btn_open) {
+            Intent intent = new Intent(this, DefaultLayoutActivity.class);
+            startActivity(intent);
         }
     }
 
@@ -314,19 +305,15 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         if (null != mProduct && mProduct.isConnected()) {
             Log.v(TAG, "refreshSDK: True");
             mBtnOpen.setEnabled(true);
-
             String str = mProduct instanceof Aircraft ? "DJIAircraft" : "DJIHandHeld";
             mTextConnectionStatus.setText("Status: " + str + " connected");
             tryUpdateFirmwareVersionWithListener();
-
             if (null != mProduct.getModel()) {
                 mTextProduct.setText("" + mProduct.getModel().getDisplayName());
             } else {
                 mTextProduct.setText(R.string.product_information);
             }
-
             loginAccount();
-
         } else {
             Log.v(TAG, "refreshSDK: False");
             mBtnOpen.setEnabled(false);
@@ -381,5 +368,4 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
         }
         hasStartedFirmVersionListener = false;
     }
-
 }
