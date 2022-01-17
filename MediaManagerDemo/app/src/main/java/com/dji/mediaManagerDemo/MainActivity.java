@@ -17,6 +17,9 @@ import android.widget.SlidingDrawer;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.jetbrains.annotations.NotNull;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,6 +32,7 @@ import java.util.List;
 
 import dji.common.airlink.PhysicalSource;
 import dji.common.camera.SettingsDefinitions;
+import dji.common.camera.StorageState;
 import dji.common.error.DJICameraError;
 import dji.common.error.DJIError;
 import dji.common.product.Model;
@@ -41,7 +45,6 @@ import dji.sdk.media.FetchMediaTaskContent;
 import dji.sdk.media.FetchMediaTaskScheduler;
 import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
-import dji.sdk.sdkmanager.DJISDKManager;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
@@ -64,12 +67,33 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private int lastClickViewIndex =-1;
     private View lastClickView;
     private TextView mPushTv;
+    private SettingsDefinitions.StorageLocation storageLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
+        DemoApplication.getAircraftInstance().getCamera().setStorageStateCallBack(new StorageState.Callback() {
+            @Override
+            public void onUpdate(@NonNull @NotNull StorageState storageState) {
+                if(storageState.isInserted()) {
+                    storageLocation = SettingsDefinitions.StorageLocation.SDCARD;
+                    DemoApplication.getAircraftInstance().getCamera().setStorageLocation(SettingsDefinitions.StorageLocation.SDCARD, new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError djiError) {
+                        }
+                    });
+                } else {
+                    storageLocation = SettingsDefinitions.StorageLocation.INTERNAL_STORAGE;
+                    DemoApplication.getAircraftInstance().getCamera().setStorageLocation(SettingsDefinitions.StorageLocation.INTERNAL_STORAGE, new CommonCallbacks.CompletionCallback() {
+                        @Override
+                        public void onResult(DJIError djiError) {
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Override
@@ -307,8 +331,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             if ((currentFileListState == MediaManager.FileListState.SYNCING) || (currentFileListState == MediaManager.FileListState.DELETING)){
                 DJILog.e(TAG, "Media Manager is busy.");
             }else{
-
-                mMediaManager.refreshFileListOfStorageLocation(SettingsDefinitions.StorageLocation.SDCARD, djiError -> {
+                mMediaManager.refreshFileListOfStorageLocation(storageLocation, djiError -> {
                     if (null == djiError) {
                         hideProgressDialog();
 
@@ -319,8 +342,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             lastClickView = null;
                         }
 
-                        mediaFileList = mMediaManager.getSDCardFileListSnapshot();
-                        if(mediaFileList != null) {
+                        List<MediaFile> tempList;
+                        if (storageLocation == SettingsDefinitions.StorageLocation.SDCARD) {
+                            tempList = mMediaManager.getSDCardFileListSnapshot();
+                        } else {
+                            tempList = mMediaManager.getInternalStorageFileListSnapshot();
+                        }
+                        if (tempList != null) {
+                            mediaFileList.addAll(tempList);
+                        }
+                        if (mediaFileList != null) {
                             Collections.sort(mediaFileList, (lhs, rhs) -> {
                                 if (lhs.getTimeCreated() < rhs.getTimeCreated()) {
                                     return 1;

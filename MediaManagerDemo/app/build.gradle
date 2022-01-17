@@ -65,7 +65,7 @@ android {
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.squareup:otto:1.3.8'
-    implementation('com.dji:dji-sdk:4.15.1', {
+    implementation('com.dji:dji-sdk:4.16', {
         /**
          * Uncomment the "library-anti-distortion" if your app does not need Anti Distortion for Mavic 2 Pro and Mavic 2 Zoom.
          * Uncomment the "fly-safe-database" if you need database for release, or we will download it when DJISDKManager.getInstance().registerApp
@@ -80,15 +80,14 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    compileOnly 'com.dji:dji-sdk-provided:4.15'
+    compileOnly 'com.dji:dji-sdk-provided:4.16'
     implementation ('com.dji:dji-uxsdk:4.15', {
-        exclude module: 'dji-sdk'
-
         /**
          * Uncomment the following line to exclude amap from the app.
          * Note that Google Play Store does not allow APKs that include this library.
          */
         // exclude group: 'com.amap.api'
+        exclude module: 'dji-sdk'
     })
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
