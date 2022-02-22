@@ -125,8 +125,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         }
 
-        if (isMavicAir2() || isM300()) {
-            if (DemoApplication.getCameraInstance() != null) {
+        if (DemoApplication.getCameraInstance() != null) {
+            if (isMavicAir2() || isAir2S() || isM300()) {
                 DemoApplication.getCameraInstance().exitPlayback(djiError -> {
                     if (djiError != null) {
                         DemoApplication.getCameraInstance().setFlatMode(SettingsDefinitions.FlatCameraMode.PHOTO_SINGLE, djiError1 -> {
@@ -286,7 +286,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 if (null != mMediaManager) {
                     mMediaManager.addUpdateFileListStateListener(this.updateFileListStateListener);
                     mMediaManager.addMediaUpdatedVideoPlaybackStateListener(this.updatedVideoPlaybackStateListener);
-                    if (isMavicAir2() || isM300()) {
+                    if (isMavicAir2() || isAir2S() || isM300()) {
                         DemoApplication.getCameraInstance().enterPlayback(djiError -> {
                             if (djiError == null) {
                                 DJILog.e(TAG, "Set cameraMode success");
@@ -771,6 +771,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
         BaseProduct baseProduct = DemoApplication.getProductInstance();
         if (baseProduct != null) {
             return baseProduct.getModel() == Model.MAVIC_AIR_2;
+        }
+        return false;
+    }
+
+    private boolean isAir2S() {
+        BaseProduct baseProduct = DemoApplication.getProductInstance();
+        if (baseProduct != null) {
+            return baseProduct.getModel() == Model.DJI_AIR_2S;
         }
         return false;
     }
