@@ -130,7 +130,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 DemoApplication.getCameraInstance().exitPlayback(djiError -> {
                     if (djiError != null) {
                         DemoApplication.getCameraInstance().setFlatMode(SettingsDefinitions.FlatCameraMode.PHOTO_SINGLE, djiError1 -> {
-                            if (djiError1 != null){
+                            if (djiError1 != null) {
                                 setResultToToast("Set PHOTO_SINGLE Mode Failed. " + djiError1.getDescription());
                             }
                         });
@@ -138,7 +138,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 });
             } else {
                 DemoApplication.getCameraInstance().setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, djiError -> {
-                    if (djiError != null){
+                    if (djiError != null) {
                         setResultToToast("Set SHOOT_PHOTO Mode Failed. " + djiError.getDescription());
                     }
                 });

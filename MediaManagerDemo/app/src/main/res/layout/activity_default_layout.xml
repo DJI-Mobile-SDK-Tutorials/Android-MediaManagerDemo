@@ -11,6 +11,7 @@
 
     <!-- Widget to see first person view (FPV) -->
     <dji.ux.widget.FPVWidget
+        android:id="@+id/fpv_widget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 

@@ -134,7 +134,7 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                 @Override
                 public void run() {
                     showToast( "registering, pls wait...");
-                    DJISDKManager.getInstance().registerApp(getApplicationContext(), new DJISDKManager.SDKManagerCallback() {
+                    DJISDKManager.getInstance().registerApp(ConnectionActivity.this.getApplicationContext(), new DJISDKManager.SDKManagerCallback() {
                         @Override
                         public void onRegister(DJIError djiError) {
                             if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
@@ -142,7 +142,7 @@ public class ConnectionActivity extends Activity implements View.OnClickListener
                                 DJISDKManager.getInstance().startConnectionToProduct();
                                 showToast("Register Success");
                             } else {
-                                showToast( "Register sdk fails, check network is available");
+                                showToast( "Register sdk fails, check network is available： djiError:"+djiError);
                             }
                             Log.v(TAG, djiError.getDescription());
                         }
