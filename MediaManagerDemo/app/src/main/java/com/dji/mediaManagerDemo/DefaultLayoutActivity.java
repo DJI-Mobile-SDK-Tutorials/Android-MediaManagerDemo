@@ -6,18 +6,21 @@ import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import dji.common.airlink.PhysicalSource;
-import dji.common.product.Model;
+
+import dji.keysdk.ProductKey;
+import dji.ux.widget.FPVWidget;
 
 public class DefaultLayoutActivity extends AppCompatActivity implements View.OnClickListener{
 
     private Button mMediaManagerBtn;
+    private FPVWidget fpvWidget;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_default_layout);
         mMediaManagerBtn = (Button)findViewById(R.id.btn_mediaManager);
+        fpvWidget = findViewById(R.id.fpv_widget);
         mMediaManagerBtn.setOnClickListener(this);
     }
 
@@ -27,5 +30,11 @@ public class DefaultLayoutActivity extends AppCompatActivity implements View.OnC
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fpvWidget.updateWidget(ProductKey.create(ProductKey.MODEL_NAME));
     }
 }

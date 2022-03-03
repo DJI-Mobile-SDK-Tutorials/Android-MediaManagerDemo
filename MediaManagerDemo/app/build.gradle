@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 
 repositories {
     mavenLocal()
+    mavenCentral()
+    maven { url 'https://mapbox.bintray.com/mapbox' }
 }
 
 android {
@@ -76,12 +78,12 @@ dependencies {
         //exclude module: 'fly-safe-database'
     })
 
-    androidTestCompile('androidx.test.espresso:espresso-core:3.1.0', {
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
     compileOnly 'com.dji:dji-sdk-provided:4.16'
-    implementation ('com.dji:dji-uxsdk:4.15', {
+    implementation ('com.dji:dji-uxsdk:4.16', {
         /**
          * Uncomment the following line to exclude amap from the app.
          * Note that Google Play Store does not allow APKs that include this library.
